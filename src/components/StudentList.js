@@ -5,8 +5,14 @@ import './style.css';
 
 let pageOptions = {
   include_docs: true,
-  limit: 5
+  limit: 3
 };
+
+const config = {
+  total_rows: 0
+}
+
+let visited = [];
 
 export default class StudentList extends Component {
 
@@ -23,26 +29,43 @@ export default class StudentList extends Component {
 
     this.toggleModalState = this.toggleModalState.bind(this);
     this.getData = this.getData.bind(this);
+    this.nextPage = this.nextPage.bind(this);
+    this.previousPage = this.previousPage.bind(this);
     this.deleteStudent = this.deleteStudent.bind(this);
+    this.shouldNextDisable = this.shouldNextDisable.bind(this);
   }
 
   componentWillMount() {
     this.getData();
   }
 
-  getData(prev = false) {
+  nextPage() {
+    visited.push(this.state.students[0]._id);
+    pageOptions.skip = 1;
+    this.getData();
+  }
+
+  previousPage() {
+    pageOptions.startkey = visited.pop();
+    pageOptions.skip = 0;
+    this.getData();
+  }
+
+  getData(addUpdate = false) {
+
+    if (addUpdate) {
+      visited = [];
+      pageOptions = {
+        include_docs: true,
+        limit: 3
+      };
+    }
 
     this.setState({
-      loading: false
+      loading: true
     });
 
     console.log('pageOptions: ', pageOptions);
-
-    if (prev === true && pageOptions.prevStartKey) {
-      pageOptions.startkey = pageOptions.prevStartKey;
-      pageOptions.descending = true;
-      pageOptions.skip = 0;
-    }
 
     console.log('before fetch options: ', Object.assign({}, pageOptions));
     db().allDocs(
@@ -50,23 +73,14 @@ export default class StudentList extends Component {
     ).then(response => {
 
       if (response && response.rows.length > 0) {
-        console.log('rows: ', response.rows);
-        if (prev === true) {
-          pageOptions.startkey = pageOptions.prevStartKey;
-          pageOptions.prevStartKey = response.rows[response.rows.length - 1].key;
-        } else {
-          pageOptions.prevStartKey = pageOptions.startkey ? pageOptions.startkey : null;
-          pageOptions.startkey = response.rows[response.rows.length - 1].key;
-        }
+        console.log('rows: ', response);
+        config.total_rows = response.total_rows;
+        pageOptions.startkey = response.rows[response.rows.length - 1].key;
         pageOptions.skip = 1;
         console.log('after fetch options: ', Object.assign({}, pageOptions));
       }
 
-      if (prev === true) {
-        this.setData(response.rows.reverse())
-      } else {
-        this.setData(response.rows)
-      }
+      this.setData(response.rows)
 
     });
 
@@ -99,10 +113,12 @@ export default class StudentList extends Component {
       student: student && student._id ? student : {}
     });
 
-    if (!student) {
-      this.getData();
-    }
+    this.getData(true);
 
+  }
+
+  shouldNextDisable() {
+    return ((visited.length + 1) * pageOptions.limit) >= config.total_rows;
   }
 
   render() {
@@ -161,8 +177,8 @@ export default class StudentList extends Component {
         <div className="columns">
           <div className="column">
             <nav className="pagination">
-              <a className="pagination-previous" onClick={() => this.getData(true)} title="This is the first page">Previous</a>
-              <a className="pagination-next" onClick={this.getData}>Next page</a>
+              <a className="pagination-previous" onClick={this.previousPage} title="This is the first page" disabled={!visited.length}>Previous</a>
+              <a className="pagination-next" onClick={this.nextPage} disabled={this.shouldNextDisable()}>Next page</a>
               <ul className="pagination-list">
                 <li>
                   <a className="pagination-link is-current">1</a>
