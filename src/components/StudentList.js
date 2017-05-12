@@ -16,9 +16,14 @@ export default class StudentList extends Component {
     };
 
     this.toggleModalState = this.toggleModalState.bind(this);
+    this.getData = this.getData.bind(this);
   }
 
   componentWillMount() {
+    this.getData();
+  }
+
+  getData() {
 
     this.setState({
       loading: false
@@ -45,6 +50,8 @@ export default class StudentList extends Component {
       showModal: !this.state.showModal,
       student: student ? student : {}
     });
+
+    this.getData();
   }
 
   render() {
@@ -61,6 +68,7 @@ export default class StudentList extends Component {
       <div className="container">
 
         <a className="button is-primary is-inverted" onClick={this.toggleModalState}>Add</a>
+        <hr />
 
         <StudentAdd
           showModal={this.state.showModal}
