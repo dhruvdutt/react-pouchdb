@@ -1,18 +1,30 @@
 import PouchDB from 'pouchdb';
 
 let dbInstance;
+let dbServerInstance;
 
 /**
- * Get the database instance to work with db methods
+ * Get the client database instance
  *
- * @returns   {Object}    Database instance
+ * @returns   {Object}    Client database instance
  */
 export function db() {
+  if (dbInstance === undefined) throw Error ('Database not initialized/found.');
   return dbInstance;
 }
 
 /**
- * Initialize PouchDB Database
+ * Get the server database instance
+ *
+ * @returns   {Object}    Server database instance
+ */
+export function dbServer() {
+  if (dbServerInstance === undefined) throw Error ('Server database not initialized/found.');
+  return dbServerInstance;
+}
+
+/**
+ * Initialize database which defaults initializing client database
  *
  * @param     {!String}   type      Database type
  * @param     {!String}   name      Database name
@@ -21,11 +33,52 @@ export function db() {
  * @returns   {Object}    Database instance
  */
 export function init(type = 'local', name = 'db', debug = false) {
+  return initClient(type, name, debug);
+}
 
-  if (type === 'local')   dbInstance = new PouchDB(name);
-  if (type === 'remote')  dbInstance = new PouchDB('http://localhost:5984/kittens');
+/**
+ * Initialize Client database
+ *
+ * @param     {!String}   type      Database type
+ * @param     {!String}   name      Database name
+ * @param     {!Boolean}  debug     Debug mode
+ *
+ * @returns   {Object}    Database instance
+ */
+export function initClient(type = 'local', name = 'db', debug = false) {
+  return dbInstance = create(type, name, debug);
+}
 
-  dbInstance.info().then(info => {
+/**
+ * Initialize Server Database
+ *
+ * @param     {!String}   type      Database type
+ * @param     {!String}   name      Database name
+ * @param     {!Boolean}  debug     Debug mode
+ *
+ * @returns   {Object}    Database instance
+ */
+export function initServer(type = 'local', name = 'db', debug = false) {
+  return dbServerInstance = create(type, name, debug);
+}
+
+/**
+ * Initialize PouchDB database
+ *
+ * @param     {!String}   type      Database type
+ * @param     {!String}   name      Database name
+ * @param     {!Boolean}  debug     Debug mode
+ *
+ * @returns   {Object}    Database instance
+ */
+function create(type = 'local', name = 'db', debug = false) {
+
+  let db;
+
+  if (type === 'local')   db = new PouchDB(name);
+  if (type === 'remote')  db = new PouchDB('http://localhost:5984/' + name);
+
+  db.info().then(info => {
     console.log(type + ' DB ' + name + ' created', info);
   });
 
@@ -34,10 +87,24 @@ export function init(type = 'local', name = 'db', debug = false) {
   // Required for working with pouchdb-inspector
   if (typeof window !== "undefined") { window.PouchDB = PouchDB }
 
-  return dbInstance;
-
+  return db;
 }
 
+/**
+ * Sync client/server databases
+ *
+ * @returns   {Boolean}   Sync success/failure
+ */
 export function sync() {
-  if (db() === undefined) throw Error ('Database not initialized/found.');
+
+  let clientDb = db(), serverDb = dbServer();
+
+  clientDb.sync(serverDb).on('complete', () => {
+    console.log('Sync Complete');
+    return true;
+  }).on('error', err => {
+    console.log('Sync Error', err);
+    return false;
+  });
+
 }
