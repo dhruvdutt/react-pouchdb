@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { db } from '../database/pouchdb';
-import { indexStudents } from '../database/indexes';
 
 export default class StudentAdd extends Component {
 
@@ -37,10 +36,7 @@ export default class StudentAdd extends Component {
   }
 
   addUpdateStudent() {
-    db().put(this.state.student)
-      .then(function () {
-        indexStudents();
-      });
+    db().put(this.state.student);
 
     this.setState({
       student: {}
