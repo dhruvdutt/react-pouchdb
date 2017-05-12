@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {db} from '../config/database';
+import { db } from '../database/pouchdb';
+import { indexStudents } from '../database/indexes';
 
 export default class StudentAdd extends Component {
 
@@ -8,7 +9,7 @@ export default class StudentAdd extends Component {
 
     this.state = {
       student: {}
-    }
+    };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.addUpdateStudent = this.addUpdateStudent.bind(this);
@@ -36,11 +37,17 @@ export default class StudentAdd extends Component {
   }
 
   addUpdateStudent() {
-    db().put(this.state.student);
+    db().put(this.state.student)
+      .then(function () {
+        indexStudents();
+      });
+
     this.setState({
       student: {}
     });
+
     this.props.toggleModalState();
+
   }
 
   closeModal() {

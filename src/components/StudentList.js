@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {db} from '../config/database';
+import { db } from '../database/pouchdb';
 import StudentAdd from './StudentAdd';
 import './style.css';
 
