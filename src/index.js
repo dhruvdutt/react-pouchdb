@@ -9,6 +9,8 @@ dbConfig.init('local', 'kittens');
 
 dbConfig.initServer('remote', 'kittens');
 
+dbConfig.sync();
+
 ReactDOM.render(
   <App />,
   document.getElementById('root')

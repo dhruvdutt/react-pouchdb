@@ -3,6 +3,11 @@ import {db} from '../config/database';
 import StudentAdd from './StudentAdd';
 import './style.css';
 
+let pageOptions = {
+  include_docs: true,
+  limit: 5
+};
+
 export default class StudentList extends Component {
 
   constructor() {
@@ -25,26 +30,59 @@ export default class StudentList extends Component {
     this.getData();
   }
 
-  getData() {
+  getData(prev = false) {
 
     this.setState({
       loading: false
     });
 
-    db().allDocs({include_docs: true}).then(response => {
+    console.log('pageOptions: ', pageOptions);
 
-      let students = [];
+    if (prev === true && pageOptions.prevStartKey) {
+      pageOptions.startkey = pageOptions.prevStartKey;
+      pageOptions.descending = true;
+      pageOptions.skip = 0;
+    }
 
-      response.rows.forEach(row => {
-        students.push(row.doc);
-      });
+    console.log('before fetch options: ', Object.assign({}, pageOptions));
+    db().allDocs(
+      pageOptions
+    ).then(response => {
 
-      this.setState({
-        students:students,
-        loading: false
-      });
+      if (response && response.rows.length > 0) {
+        console.log('rows: ', response.rows);
+        if (prev === true) {
+          pageOptions.startkey = pageOptions.prevStartKey;
+          pageOptions.prevStartKey = response.rows[response.rows.length - 1].key;
+        } else {
+          pageOptions.prevStartKey = pageOptions.startkey ? pageOptions.startkey : null;
+          pageOptions.startkey = response.rows[response.rows.length - 1].key;
+        }
+        pageOptions.skip = 1;
+        console.log('after fetch options: ', Object.assign({}, pageOptions));
+      }
+
+      if (prev === true) {
+        this.setData(response.rows.reverse())
+      } else {
+        this.setData(response.rows)
+      }
+
     });
 
+  }
+
+  setData(rows) {
+    let students = [];
+
+    rows.forEach(row => {
+      students.push(row.doc);
+    });
+
+    this.setState({
+      students:students,
+      loading: false
+    });
   }
 
   deleteStudent(student) {
@@ -114,9 +152,27 @@ export default class StudentList extends Component {
                 )
               })
             }
-            <tr></tr>
           </tbody>
         </table>
+        <div className="columns">
+          <div className="column">
+            <nav className="pagination">
+              <a className="pagination-previous" onClick={() => this.getData(true)} title="This is the first page">Previous</a>
+              <a className="pagination-next" onClick={this.getData}>Next page</a>
+              <ul className="pagination-list">
+                <li>
+                  <a className="pagination-link is-current">1</a>
+                </li>
+                <li>
+                  <a className="pagination-link">2</a>
+                </li>
+                <li>
+                  <a className="pagination-link">3</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
       </div>
     );
   }

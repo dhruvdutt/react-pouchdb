@@ -99,7 +99,10 @@ export function sync() {
 
   let clientDb = db(), serverDb = dbServer();
 
-  clientDb.sync(serverDb).on('complete', () => {
+  clientDb.sync(serverDb, {
+    live: true,
+    retry: true
+  }).on('complete', () => {
     console.log('Sync Complete');
     return true;
   }).on('error', err => {
