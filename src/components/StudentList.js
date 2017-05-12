@@ -96,10 +96,13 @@ export default class StudentList extends Component {
   toggleModalState(student) {
     this.setState({
       showModal: !this.state.showModal,
-      student: student ? student : {}
+      student: student && student._id ? student : {}
     });
 
-    this.getData();
+    if (!student) {
+      this.getData();
+    }
+
   }
 
   render() {
@@ -123,7 +126,7 @@ export default class StudentList extends Component {
         <StudentAdd
           showModal={this.state.showModal}
           toggleModalState={this.toggleModalState}
-          student={this.state.student}
+          studentID={this.state.student._id}
          />
 
         <table className="table">
@@ -146,6 +149,7 @@ export default class StudentList extends Component {
                     <td>{student.email}</td>
                     <td>{student.contact}</td>
                     <td>
+                      <a className="button is-primary is-inverted" onClick={() => this.toggleModalState(student)}>Edit</a>
                       <a className="button is-primary is-inverted" onClick={() => this.deleteStudent(student)}>Delete</a>
                     </td>
                   </tr>
