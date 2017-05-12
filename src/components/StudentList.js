@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {db} from '../config/database';
 import StudentAdd from './StudentAdd';
+import './style.css';
 
 export default class StudentList extends Component {
 
@@ -17,6 +18,7 @@ export default class StudentList extends Component {
 
     this.toggleModalState = this.toggleModalState.bind(this);
     this.getData = this.getData.bind(this);
+    this.deleteStudent = this.deleteStudent.bind(this);
   }
 
   componentWillMount() {
@@ -45,6 +47,14 @@ export default class StudentList extends Component {
 
   }
 
+  deleteStudent(student) {
+    db().get(student._id).then(doc => {
+      db().remove(doc).then(() => {
+        this.getData();
+      })
+    });
+  }
+
   toggleModalState(student) {
     this.setState({
       showModal: !this.state.showModal,
@@ -65,9 +75,11 @@ export default class StudentList extends Component {
     }
 
     return (
-      <div className="container">
+      <div className="container student-list-container">
 
-        <a className="button is-primary is-inverted" onClick={this.toggleModalState}>Add</a>
+        <div className="has-text-right">
+          <a className="button is-primary" onClick={this.toggleModalState}>Add</a>
+        </div>
         <hr />
 
         <StudentAdd
@@ -83,6 +95,7 @@ export default class StudentList extends Component {
               <th>Name</th>
               <th>Email</th>
               <th>Contact</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -95,7 +108,7 @@ export default class StudentList extends Component {
                     <td>{student.email}</td>
                     <td>{student.contact}</td>
                     <td>
-                      <a className="button is-primary is-inverted" onClick={() => this.toggleModalState(student)}>Edit</a>
+                      <a className="button is-primary is-inverted" onClick={() => this.deleteStudent(student)}>Delete</a>
                     </td>
                   </tr>
                 )

@@ -26,6 +26,9 @@ export default class StudentAdd extends Component {
 
   addUpdateStudent() {
     db().put(this.state.student);
+    this.setState({
+      student: {}
+    });
     this.props.toggleModalState();
   }
 
@@ -40,25 +43,25 @@ export default class StudentAdd extends Component {
               <div className="field">
                 <label className="label">ID</label>
                 <p className="control">
-                  <input className="input" type="text" placeholder="123456" name="_id" onChange={this.handleInputChange} value={this.state.student._id} />
+                  <input className="input" type="text" placeholder="123456" name="_id" onChange={this.handleInputChange} />
                 </p>
               </div>
               <div className="field">
                 <label className="label">Name</label>
                 <p className="control">
-                  <input className="input" type="text" placeholder="Test" name="name" onChange={this.handleInputChange} value={this.state.student.name} />
+                  <input className="input" type="text" placeholder="Test" name="name" onChange={this.handleInputChange} />
                 </p>
               </div>
               <div className="field">
                 <label className="label">Email</label>
                 <p className="control">
-                  <input className="input" type="email" placeholder="d@d.in" name="email" onChange={this.handleInputChange} value={this.state.student.email} />
+                  <input className="input" type="email" placeholder="d@d.in" name="email" onChange={this.handleInputChange} />
                 </p>
               </div>
               <div className="field">
                 <label className="label">Contact</label>
                 <p className="control">
-                  <input className="input" type="text" placeholder="8866323155" name="contact" onChange={this.handleInputChange} value={this.state.student.contact} />
+                  <input className="input" type="text" placeholder="8866323155" name="contact" onChange={this.handleInputChange} />
                 </p>
               </div>
               <div className="field">
