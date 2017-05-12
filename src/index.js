@@ -4,10 +4,8 @@ import App from './App';
 import './index.css';
 import * as dbConfig from './config/database';
 
-// dbConfig.init('local', 'kittens');
+dbConfig.init('local', 'kittens');
 // dbConfig.init('remote', 'kittens');
-
-dbConfig.sync();
 
 ReactDOM.render(
   <App />,

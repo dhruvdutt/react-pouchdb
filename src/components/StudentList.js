@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import db from '../config/database';
-import Student from './Student';
+import {db} from '../config/database';
+import StudentAdd from './StudentAdd';
 
 export default class StudentList extends Component {
 
@@ -10,8 +10,12 @@ export default class StudentList extends Component {
 
     this.state = {
       loading: false,
-      students: []
+      showModal: false,
+      students: [],
+      student: {}
     };
+
+    this.toggleModalState = this.toggleModalState.bind(this);
   }
 
   componentWillMount() {
@@ -20,21 +24,26 @@ export default class StudentList extends Component {
       loading: false
     });
 
+    db().allDocs({include_docs: true}).then(response => {
+
+      let students = [];
+
+      response.rows.forEach(row => {
+        students.push(row.doc);
+      });
+
+      this.setState({
+        students:students,
+        loading: false
+      });
+    });
+
+  }
+
+  toggleModalState(student) {
     this.setState({
-      students: [
-        {
-          id: '201612001',
-          name: 'Dhwanil',
-          contact: '8866323155',
-          email: 'dhwanil@dhwanil.in'
-        },
-        {
-          id: '201612002',
-          name: 'Dhruvdutt',
-          contact: '8866987456',
-          email: 'dhruvdutt@dhruvdutt.in'
-        }
-      ]
+      showModal: !this.state.showModal,
+      student: student ? student : {}
     });
   }
 
@@ -50,6 +59,15 @@ export default class StudentList extends Component {
 
     return (
       <div className="container">
+
+        <a className="button is-primary is-inverted" onClick={this.toggleModalState}>Add</a>
+
+        <StudentAdd
+          showModal={this.state.showModal}
+          toggleModalState={this.toggleModalState}
+          student={this.state.student}
+         />
+
         <table className="table">
           <thead>
             <tr>
@@ -63,11 +81,14 @@ export default class StudentList extends Component {
             {
               this.state.students.map(student => {
                 return (
-                  <tr key={student.id}>
-                    <td>{student.id}</td>
+                  <tr key={student._id}>
+                    <td>{student._id}</td>
                     <td>{student.name}</td>
                     <td>{student.email}</td>
                     <td>{student.contact}</td>
+                    <td>
+                      <a className="button is-primary is-inverted" onClick={() => this.toggleModalState(student)}>Edit</a>
+                    </td>
                   </tr>
                 )
               })
