@@ -1,37 +1,43 @@
 import PouchDB from 'pouchdb';
 
-let db;
+let dbInstance;
 
-export function init(type, name, debug) {
+/**
+ * Get the database instance to work with db methods
+ *
+ * @returns   {Object}    Database instance
+ */
+export function db() {
+  return dbInstance;
+}
 
-  if (type === 'local')   db = new PouchDB(name);
-  if (type === 'remote')  db = new PouchDB('http://localhost:5984/kittens');
+/**
+ * Initialize PouchDB Database
+ *
+ * @param     {!String}   type      Database type
+ * @param     {!String}   name      Database name
+ * @param     {!Boolean}  debug     Debug mode
+ *
+ * @returns   {Object}    Database instance
+ */
+export function init(type = 'local', name = 'db', debug = false) {
 
-  db.info().then(info => {
+  if (type === 'local')   dbInstance = new PouchDB(name);
+  if (type === 'remote')  dbInstance = new PouchDB('http://localhost:5984/kittens');
+
+  dbInstance.info().then(info => {
     console.log(type + ' DB ' + name + ' created', info);
   });
 
-  debug ? enableDebug() : disableDebug();
+  debug ? PouchDB.debug.enable('*') : PouchDB.debug.disable();
 
-  return db;
+  // Required for working with pouchdb-inspector
+  if (typeof window !== "undefined") { window.PouchDB = PouchDB }
+
+  return dbInstance;
+
 }
 
-function enableDebug () {
-  PouchDB.debug.enable('*');
-}
-
-function disableDebug () {
-  PouchDB.debug.disable();
-}
-
-export function put(doc) {
-  return db.put(doc);
-}
-
-export function post(doc) {
-  return db.put(doc);
-}
-
-export function get(key) {
-  return db.get(key);
+export function sync() {
+  if (db() === undefined) throw Error ('Database not initialized/found.');
 }

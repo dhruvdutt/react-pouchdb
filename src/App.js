@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-
+import {db} from './config/database';
 
 class App extends Component {
+
+  componentWillMount() {
+    console.log('componentWillMount', db);
+  }
+
   render() {
     return (
       <div className="App">
