@@ -69,7 +69,7 @@ export default class StudentAdd extends Component {
               <div className="field">
                 <label className="label">ID</label>
                 <p className="control">
-                  <input className="input" type="text" placeholder="123456" name="_id" onChange={this.handleInputChange} value={this.state.student._id || ''} disabled={this.state.student._id ? true : false} />
+                  <input className="input" type="text" placeholder="123456" name="_id" onChange={this.handleInputChange} value={this.state.student._id || ''} />
                 </p>
               </div>
               <div className="field">
